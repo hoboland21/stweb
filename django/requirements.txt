@@ -1,0 +1,14 @@
+django 
+djangorestframework 
+django-filter
+whitenoise
+markdown
+django-cors-headers
+uwsgi
+mysqlclient
+configparser
+ipython
+requests
+pytz
+python-ldap
+django-auth-ldap
