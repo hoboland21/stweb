@@ -1,0 +1,7 @@
+#!/bin/sh
+
+ng g component login
+ng g component dashboard
+ng g service services/auth 
+ng g interface interfaces/login 
+ng g guard guards/auth 
