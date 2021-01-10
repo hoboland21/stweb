@@ -1,5 +1,6 @@
 if [ ! -d stweb ] ; then 
-ng new stweb --defaults=true
+ng new stweb --routing --defaults=true
+
 fi
 cd stweb
 npm install
