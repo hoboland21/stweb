@@ -12,3 +12,4 @@ requests
 pytz
 python-ldap
 django-auth-ldap
+passlib
