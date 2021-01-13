@@ -16,12 +16,13 @@ Including another URLconf
 from django.urls import path, include
 from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets,permissions
-from alpha.views import UserDBList, UserDBView
+from alpha.views import UserDBList, UserDBView, UserDBAuth
 
 
 urlpatterns = [
     
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('users/', UserDBList.as_view()),
-    path('users/<str:username>/',UserDBView.as_view())
+    path('users/auth/', UserDBAuth.as_view()),
+    path('users/view/<str:username>/',UserDBView.as_view())
 ]
