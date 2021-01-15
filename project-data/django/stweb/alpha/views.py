@@ -36,7 +36,7 @@ class UserDBList(APIView):
 
 
    def post(self, request, format=None):
-      serializer = UserDBAuthSerializer(data=request.data)
+      serializer = UserDBSerializer(data=request.data)
       if serializer.is_valid():
          serializer.validated_data["password"]  = pbkdf2_sha256.hash(serializer.validated_data["password"])
          try:

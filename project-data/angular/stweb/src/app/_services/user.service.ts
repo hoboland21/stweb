@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const API_URL = 'http://172.10.1.3/users';
+const API_URL = 'http://10.0.0.234:8000/users';
 
 
 @Injectable({
@@ -16,15 +16,4 @@ export class UserService {
     return this.http.get(API_URL, { responseType: 'json' });
   }
 
-  getUserBoard(): Observable<any> {
-    return this.http.get(API_URL + 'user', { responseType: 'text' });
-  }
-
-  getModeratorBoard(): Observable<any> {
-    return this.http.get(API_URL + 'mod', { responseType: 'text' });
-  }
-
-  getAdminBoard(): Observable<any> {
-    return this.http.get(API_URL , { responseType: 'text' });
-  }
 }

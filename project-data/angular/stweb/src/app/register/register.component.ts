@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../_services/auth.service';
+import { IUserDB } from '../_interfaces/IUserDB';
+import {  FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-register',
@@ -7,24 +9,35 @@ import { AuthService } from '../_services/auth.service';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-  form: any = {
-    username: null,
-    email: null,
-    password: null
-  };
+  
+
   isSuccessful = false;
   isSignUpFailed = false;
   errorMessage = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private formBuilder: FormBuilder) { }
 
-  ngOnInit(): void {
+    userForm : FormGroup;
+    result : IUserDB;
+  
+
+    ngOnInit(): void {
+    this.userForm = this.formBuilder.group ({
+      fullname: '',
+      username:  '',
+      password: '',
+      email: '',
+      group: '',
+    });
+  
+  
   }
 
   onSubmit(): void {
-    const { username, email, password } = this.form;
 
-    this.authService.register(username, email, password).subscribe(
+    this.authService.register(this.result).subscribe(
       data => {
         console.log(data);
         this.isSuccessful = true;
