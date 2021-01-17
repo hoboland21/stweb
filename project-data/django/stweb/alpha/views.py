@@ -9,66 +9,48 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics
 from django.http import Http404
-from .serializer import UserDBSerializer,UserDBAuthSerializer,UserDBAuthCheckSerializer
-from passlib.hash import pbkdf2_sha256
+from .serializer import UserSerializer,GroupSerializer, UserAuthSerializer
 
 
-#-----------------------------------------------------
-class UserDBAuth(APIView) :
-   def post(self, request,format=None) :
-      serializer = UserDBAuthCheckSerializer(data=request.data)
-      if serializer.is_valid() :
-         try:
-            user = UserDB.objects.get(username=serializer.validated_data["username"])
-            if user.check_passwd(serializer.validated_data["password"]) :
-               serializer2 = UserDBSerializer(user)
-               return Response(serializer2.data)
-         except:
-            pass
-      return Response(status=status.HTTP_204_NO_CONTENT)
-#-----------------------------------------------------
-class UserDBList(APIView):
-   
-   def get(self, request):
-      users = UserDB.objects.all()
-      serializer = UserDBSerializer(users, many=True)
-      return Response(serializer.data)
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from rest_framework import permissions
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+
+class UserCreateView(APIView)   :
    def post(self, request, format=None):
-      serializer = UserDBSerializer(data=request.data)
-      if serializer.is_valid():
-         serializer.validated_data["password"]  = pbkdf2_sha256.hash(serializer.validated_data["password"])
-         try:
-            serializer.save()
-         except:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-         return Response(serializer.data, status=status.HTTP_201_CREATED)
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#-----------------------------------------------------
-class UserDBView(APIView) :
-   def get_object(self,username):
-      try:
-         return UserDB.objects.get(username=username)
-      except UserDB.DoesNotExist:
-         raise Http404
-
-   def get (self, request, username, format=None) :
-      user = self.get_object(username)
-      serializer = UserDBSerializer(user)
-      return Response(serializer.data)
-
-   def delete ( self, request, username, format=None):
-      user = self.get_object(username)
-      user.delete()
-      return Response(status=status.HTTP_204_NO_CONTENT)
-
-   def put (self, request, username, format=None):
-      user = self.get_object(username)
-      serializer = UserDBSerializer(user, data=request.data)
+      serializer = UserAuthSerializer(data=request.data)
       if serializer.is_valid():
          serializer.save()
-         return Response(serializer.data)
+         return Response(serializer.data, status=status.HTTP_201_CREATED)
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class UserView(APIView)   :
+   def get(self, request, pk, format=None):
+      serializer = UserSerializer(data=request.data)
+      if serializer.is_valid():
+         serializer.save()
+         return Response(serializer.data, status=status.HTTP_201_CREATED)
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

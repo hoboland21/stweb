@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../_services/auth.service';
-import { TokenStorageService } from '../_services/token-storage.service';
-import { IAuth } from '../_interfaces/IAuth';
-import {  FormGroup, FormControl } from '@angular/forms';
+import { UserService } from '../_services/user.service';
 
+import {  FormGroup, FormControl } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { first } from 'rxjs/operators';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -11,22 +12,18 @@ import {  FormGroup, FormControl } from '@angular/forms';
 })
 export class LoginComponent implements OnInit {
   formdata;
-  fdata;
-  form: IAuth;
-  isLoggedIn = false;
-  isLoginFailed = false;
-  errorMessage = '';
-  group = '';
-
-  constructor(private authService: AuthService, private tokenStorage: TokenStorageService) { }
+  errorMessage;
+  time;
+  usr;
+  token;
+  constructor(private authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private userService: UserService
+    ) { }
 
   ngOnInit(): void {
     
-    if (this.tokenStorage.getToken()) {
-      this.isLoggedIn = true;
-      this.group = this.tokenStorage.getUser().group;
-    }
-  
     this.formdata = new FormGroup({
       username: new FormControl(''),
       password: new FormControl('')
@@ -34,34 +31,44 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onClickSubmit(data) {
-    console.log(data)
-  
-    this.authService.login(data).subscribe(
-      data => {
-        this.tokenStorage.saveToken(data.token);
-        this.tokenStorage.saveUser(data);
 
-        this.isLoginFailed = false;
-        this.isLoggedIn = true;
-        this.group = this.tokenStorage.getUser().group;
-        
-        console.log(data)
-        //this.reloadPage();
-                
+
+
+  
+  onClickSubmit(data) {
+    localStorage.clear()
+    this.authService.login(data)
+    .pipe(first())
+    .subscribe({
+      next: () => {
+        console.log("In the next box")
       },
-      err => {
-        this.errorMessage = err.error.message;
-        this.isLoginFailed = true;
-      }
-    );
+      error: error => console.log(error)
+    })
   }
+
+  checkList() {
+    console.log("Looking at User",this.authService.userValue.refresh)
+
+    this.userService.getList().subscribe(
+      (data) => console.log(data.refresh) 
+    )
+  }
+
+
+refreshToken() {
+  console.log(this.authService.userValue.refresh)
+  this.authService.refreshToken(this.authService.userValue)
+  .subscribe(
+    (data) => { console.log(data)
+    console.log(this.authService.userValue)
+    }
+  )
+}
 
   reloadPage(): void {
     window.location.reload();
   }
-  onSubmit(): void {
- 
 
-  }
+  
 }

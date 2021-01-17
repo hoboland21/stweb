@@ -1,74 +1,31 @@
+from django.contrib.auth.models import User,Group,Permission
 from rest_framework import serializers
-from alpha.models import UserDB
 from datetime import datetime
+from passlib.hash import pbkdf2_sha256
 
 
-
-class UserDBSerializer(serializers.ModelSerializer):
-  class Meta:
-    model= UserDB
-    fields = '__all__'
-
-
-#====================================================================
-class UserDBAuthSerializer(serializers.Serializer):
-    fullname	= serializers.CharField(max_length=256,allow_blank=True)
-    username	= serializers.CharField(max_length=128)
-    password    = serializers.CharField(max_length=1028)
-    email		= serializers.EmailField(allow_blank=True)
-    token	   = serializers.CharField(max_length=512,allow_blank=True)
-    group		= serializers.CharField(max_length=128,allow_blank=True)
-    modified      = serializers.DateTimeField()
-    def create(self, validated_data):
-        """ 
-        Create and return a new `UserDB` instance, given the validated data.
-        """
-        return UserDB.objects.create(**validated_data)
-
-#====================================================================
-class UserDBAuthCheckSerializer(serializers.Serializer):
-    username	= serializers.CharField(max_length=128)
-    password    = serializers.CharField(max_length=1028)
-    def create(self, validated_data):
-        """ 
-        Create and return a new `UserDB` instance, given the validated data.
-        """
-        return UserDB.objects.create(**validated_data)
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ['url','email', 'first_name', 'last_name', 'username',"password",'groups',
+                'last_login','date_joined']
 
 
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['url', 'name']
 
 
-
-
-
-
-
-
-
-
-class UserDBSerializerOriginal(serializers.Serializer):
-    fullname	= serializers.CharField(max_length=256,allow_blank=True)
-    username	= serializers.CharField(max_length=128)
-    email		= serializers.EmailField(allow_blank=True)
- 
- 
+class UserAuthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name','last_name','email','username', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        """ 
-        Create and return a new `UserDB` instance, given the validated data.
-        """
-        return UserDB.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-
-#       Update and return an existing `UserDB` instance, given the validated data.
-
-        instance.fullname = validated_data.get('fullname', instance.fullname)
-        instance.email = validated_data.get('email', instance.email)
-        instance.token = validated_data.get('token', instance.token)
-        instance.group = validated_data.get('group', instance.group)
-        instance.modified = datetime.now()
-        
-        instance.save()
-        return instance
-
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user

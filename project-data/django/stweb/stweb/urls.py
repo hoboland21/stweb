@@ -13,16 +13,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets,permissions
-from alpha.views import UserDBList, UserDBView, UserDBAuth
+from rest_framework_simplejwt import views as jwt_views
+
+from alpha.views import UserViewSet,GroupViewSet,UserCreateView
+
+
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'groups', GroupViewSet)
 
 
 urlpatterns = [
-    
+    path('',include(router.urls)),
+    path('admin/', admin.site.urls),
+    path('register/',UserCreateView.as_view(), name="register"),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('users/', UserDBList.as_view()),
-    path('users/auth/', UserDBAuth.as_view()),
-    path('users/view/<str:username>/',UserDBView.as_view())
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh')
+
+#    path('users/auth/', UserDBAuth.as_view()),
+#    path('user/<pk>/',UserDBView.as_view())
 ]

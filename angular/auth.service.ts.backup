@@ -1,0 +1,245 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { IUser } from '../_interfaces/IUser';
+import { Router } from '@angular/router';
+
+
+const AUTH_API = 'http://10.0.0.234:8000';
+
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+}; 
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  exp_date;
+  constructor(
+    private http: HttpClient,
+    public router: Router ) {  }
+  
+  signIn(user: IUser) {
+    localStorage.clear()
+    return this.http.post(`${AUTH_API}/api/token/`, user, httpOptions)
+      .subscribe(
+        (res: any) => {
+          localStorage.setItem('refresh_token', res.refresh)
+          localStorage.setItem('access_token', res.access)
+
+      },
+      (err) => {
+        console.log("Error",err)
+      })
+  }
+
+  refreshJWT() {
+    return this.http.post(`${AUTH_API}/api/token/refresh/`, {refresh: localStorage.refresh_token}, httpOptions)
+    .subscribe(
+      (res: any) => {
+        localStorage.setItem('access_token', res.access)
+  
+      }
+    )
+  }
+
+  tokenTTL() {
+    let t = this.tokenConvert(localStorage.access_token)
+    this.exp_date = new Date(t.exp).getTime()
+    return this.exp_date - Date.now()
+  }
+  
+  checkTime() {
+    if (localStorage.access_token) {
+      let t = this.tokenConvert(localStorage.access_token)
+      this.exp_date = new Date(t.exp).getTime()
+      if (this.exp_date  < Date.now()) {
+        console.log("running refresh")
+        this.refreshJWT()
+      }
+      else {
+        console.log( this.exp_date  - Date.now())
+      }
+  
+    }  
+    
+  }
+
+  getToken() {
+    return localStorage.getItem('access_token');
+  }
+
+  get isLoggedIn(): boolean {
+    return (this.getToken() !== null) ? true : false;
+  }
+
+  doLogout() {
+    let removeToken = localStorage.clear();
+    if (removeToken == null) {
+      this.router.navigate(['login']);
+    }
+  }
+
+  public register(user: IUser ): Observable<any> {
+    return this.http.post<any>(`${AUTH_API}/register/` , user, httpOptions);
+  }
+
+
+  public tokenConvert(token) {
+    let result = {}
+    // decode the token to read the username and expiration timestamp
+    let token_parts = token.split(/\./);
+    let token_decoded = JSON.parse(window.atob(token_parts[1]));
+    token_decoded.exp = token_decoded.exp * 1000
+    return token_decoded
+  }
+
+  public currentUser() : Observable<IUser> {
+    let tkn = this.tokenConvert(localStorage.access_token)
+    return this.http.get<IUser>(`${AUTH_API}/users/${tkn.user_id}/`)
+  }
+
+  
+  private startRefreshTokenTimer() {
+    // parse json object from base64 encoded jwt token
+    const jwtToken = JSON.parse(atob(this.userValue.access.split('.')[1]));
+
+    // set a timeout to refresh the token a minute before it expires
+    const expires = new Date(jwtToken.exp * 1000);
+    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ // User profile
+/* 
+
+  currentUser;
+  token;
+  errors;
+  token_expires;
+  username;
+
+  public saveToken(token: string): void {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+  
+ 
+
+  public signOut(): void {
+    localStorage.clear();
+  }
+  public register(user: IUser ): Observable<any> {
+    return this.http.post<any>(`${AUTH_API}/register/` , user, httpOptions);
+  }
+
+
+}
+
+
+
+
+  public getUser(): {
+    
+  }
+
+
+
+getUserProfile(id): Observable<any> {
+  let api = `${AUTH_API}/user-profile/${id}`;
+  return this.http.get(api, { headers: this.headers }).pipe(
+    map((res: Response) => {
+      return res || {}
+    }),
+    catchError(this.handleError)
+  )
+}
+
+
+
+
+// Refreshes the JWT token, to extend the time the user is logged in
+  public refreshToken() {
+    this.http.post(`${AUTH_API}/api-token-refresh/`, JSON.stringify({token: this.token}), httpOptions).subscribe(
+      data => {
+        this.updateData(data['access']);
+      },
+      err => {
+        this.errors = err['error'];
+      }
+    );
+  }
+
+
+
+
+
+
+public updateData(token) {
+    this.token = token;
+    this.errors = [];
+ 
+    // decode the token to read the username and expiration timestamp
+    const token_parts = this.token.split(/\./);
+    const token_decoded = JSON.parse(window.atob(token_parts[1]));
+    this.token_expires = new Date(token_decoded.exp * 1000);
+    this.username = token_decoded.username;
+  }
+
+      
+  localStorage.setItem('access_token', data.access)
+  localStorage.setItem('refresh_token', data.refresh)
+
+
+
+public saveToken(token: string): void {
+  window.sessionStorage.removeItem(TOKEN_KEY);
+  window.sessionStorage.setItem(TOKEN_KEY, token);
+}
+
+public getToken(): string | null {
+  return window.sessionStorage.getItem(TOKEN_KEY);
+}
+
+public saveUser(user: any): void {
+  window.sessionStorage.removeItem(USER_KEY);
+  window.sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+public getUser(): any {
+  const user = window.sessionStorage.getItem(USER_KEY);
+  if (user) {
+    return JSON.parse(user);
+  }
+
+  return {};
+}  
+
+*/
+
+

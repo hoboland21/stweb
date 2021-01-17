@@ -1,26 +1,24 @@
-import { HTTP_INTERCEPTORS, HttpEvent } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-
-import { TokenStorageService } from '../_services/token-storage.service';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-const TOKEN_HEADER_KEY = 'Authorization';       // for Spring Boot back-end
+import { AuthService } from '../_services/auth.service';
 
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(private token: TokenStorageService) { }
+export class authInterceptorProviders implements HttpInterceptor {
+    constructor(private authenticationService: AuthService) { }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    let authReq = req;
-    const token = this.token.getToken();
-    if (token != null) {
-      authReq = req.clone({ headers: req.headers.set(TOKEN_HEADER_KEY, 'Bearer ' + token) });
+    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        // add auth header with jwt if user is logged in and request is to the api url
+        const user = this.authenticationService.userValue;
+        const isLoggedIn = user && user.jwtToken;
+//        const isApiUrl = request.url.startsWith(environment.apiUrl);
+        if (isLoggedIn) {
+            request = request.clone({
+                setHeaders: { Authorization: `Bearer ${user.jwtToken}` }
+            });
+        }
+
+        return next.handle(request);
     }
-    return next.handle(authReq);
-  }
 }
-
-export const authInterceptorProviders = [
-  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
-];
