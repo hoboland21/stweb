@@ -7,9 +7,9 @@ import { map } from 'rxjs/operators';
 
 import { IUser } from '@app/_interfaces/IUser';
 import { IToken } from '@app/_interfaces/IToken';
- 
+import { AppEnv } from '@app/_helpers/appenv'
 
-const AUTH_API = 'http://10.0.0.234:8000';
+
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -30,15 +30,18 @@ export class AuthService {
     public token: Observable<IToken>;
     
     constructor(   private router: Router, 
-        private http: HttpClient  ) 
+        private http: HttpClient ,
+        private env: AppEnv ) 
         {
             this.tokenSubject = new BehaviorSubject<IToken>(null);
             this.token = this.tokenSubject.asObservable();
         }
 
-    public get tokenValue(): IToken {
-        return this.tokenSubject.value;
-    }
+
+        private AUTH_API = this.env.API_URL
+        public get tokenValue(): IToken {
+            return this.tokenSubject.value;
+        }
  
     public tokenConvert(token) {
         let result = {}
@@ -54,9 +57,9 @@ export class AuthService {
     public tokenInfo() {
         return this.tokenConvert(this.tokenValue.access)
     }
-    
+
     login(usr:any) {
-        return this.http.post<any>(`${AUTH_API}/api/token/`, usr,httpOptions)
+        return this.http.post<any>(`${this.AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {
                 localStorage.setItem('refresh',token.refresh)
                 this.tokenSubject.next(token);              
@@ -72,7 +75,7 @@ export class AuthService {
     }
 
     refreshToken() {
-        return this.http.post<any>(`${AUTH_API}/api/token/refresh/`, { refresh: localStorage.refresh },httpOptions)
+        return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.refresh },httpOptions)
             .pipe(map((token) => {
                 this.tokenSubject.next(token);
                 this.startRefreshTokenTimer();
@@ -98,7 +101,7 @@ export class AuthService {
         clearTimeout(this.refreshTokenTimeout);
     }
     public register(user: IUser ): Observable<any> {
-        return this.http.post<any>(`${AUTH_API}/register/` , user,httpOptions);
+        return this.http.post<any>(`${this.AUTH_API}/register/` , user,httpOptions);
       }
 
 }

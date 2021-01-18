@@ -13,7 +13,7 @@ import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 
 import { authInterceptorProviders } from './_helpers/auth.interceptor';
-
+import { AppEnv } from './_helpers/appenv'
 
 @NgModule({
   declarations: [
@@ -30,7 +30,7 @@ import { authInterceptorProviders } from './_helpers/auth.interceptor';
     FormsModule,
     HttpClientModule
   ],
-  providers: [authInterceptorProviders],
+  providers: [authInterceptorProviders, AppEnv],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
