@@ -10,11 +10,11 @@ const API_URL = 'http://10.0.0.234:8000/users';
 })
 
 export class UserService {
-  constructor(private http: HttpClient) { }
+  constructor( private http: HttpClient) { }
   
   
-  getList(): Observable<any> {
-    return this.http.get<any>(API_URL);
+  getList(){
+    return this.http.get<any>(API_URL)
   }
 
 }

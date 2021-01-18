@@ -1,11 +1,13 @@
 
-import { Injectable } from '@angular/core';
+import { Injectable, SkipSelf } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { IUser } from '../_interfaces/IUser';
+import { IUser } from '@app/_interfaces/IUser';
+import { IToken } from '@app/_interfaces/IToken';
+ 
 
 const AUTH_API = 'http://10.0.0.234:8000';
 
@@ -24,43 +26,57 @@ const httpOptions = {
   }; 
  */ 
 export class AuthService {
-    private userSubject: BehaviorSubject<IUser>;
-    public user: Observable<IUser>;
+    private tokenSubject: BehaviorSubject<IToken>;
+    public token: Observable<IToken>;
+    
+    constructor(   private router: Router, 
+        private http: HttpClient  ) 
+        {
+    
+            this.tokenSubject = new BehaviorSubject<IToken>(null);
+            this.token = this.tokenSubject.asObservable();
+        }
 
-    constructor(
-        private router: Router,
-        private http: HttpClient
-    ) {
-        this.userSubject = new BehaviorSubject<IUser>(null);
-        this.user = this.userSubject.asObservable();
+    public get tokenValue(): IToken {
+        return this.tokenSubject.value;
     }
 
-    public get userValue(): any {
-        return this.userSubject.value;
-    }
 
+
+
+    public tokenConvert(token) {
+        let result = {}
+        // decode the token to read the username and expiration timestamp
+        let token_parts = token.split(/\./);
+        let token_decoded = JSON.parse(window.atob(token_parts[1]));
+        token_decoded.exp = token_decoded.exp * 1000
+        return token_decoded
+    }
+    
+    
     login(usr:any) {
         return this.http.post<any>(`${AUTH_API}/api/token/`, usr,httpOptions)
-            .pipe(map(user => {
-                this.userSubject.next(user);              
+        .pipe(map(token => {
+                localStorage.setItem('refresh',token.refresh)
+                this.tokenSubject.next(token);              
                 this.startRefreshTokenTimer();
-                return user;
+                return token;
             }));
     }
 
     logout() {
     //    this.http.post<any>(`${environment.apiUrl}/users/revoke-token`, {}, { withCredentials: true }).subscribe();
         this.stopRefreshTokenTimer();
-        this.userSubject.next(null);
+        this.tokenSubject.next(null);
         this.router.navigate(['/login']);
     }
 
-    refreshToken(token) {
-        return this.http.post<any>(`${AUTH_API}/api/token/refresh/`, token,httpOptions)
-            .pipe(map((user) => {
-                this.userSubject.next(user);
+    refreshToken() {
+        return this.http.post<any>(`${AUTH_API}/api/token/refresh/`, { refresh: localStorage.refresh },httpOptions)
+            .pipe(map((token) => {
+                this.tokenSubject.next(token);
                 this.startRefreshTokenTimer();
-                return user;
+                return token;
             }));
     }
 
@@ -70,7 +86,7 @@ export class AuthService {
 
     private startRefreshTokenTimer() {
         // parse json object from base64 encoded jwt token
-        const jwtToken = JSON.parse(atob(this.userValue.access.split('.')[1]));
+        const jwtToken = JSON.parse(atob(this.tokenValue.access.split('.')[1]));
 
         // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtToken.exp * 1000);

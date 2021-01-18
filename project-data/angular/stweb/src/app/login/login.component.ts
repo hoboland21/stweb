@@ -4,7 +4,6 @@ import { UserService } from '../_services/user.service';
 
 import {  FormGroup, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { first } from 'rxjs/operators';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -16,6 +15,7 @@ export class LoginComponent implements OnInit {
   time;
   usr;
   token;
+  isLoggedIn;
   constructor(private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
@@ -37,31 +37,25 @@ export class LoginComponent implements OnInit {
   
   onClickSubmit(data) {
     localStorage.clear()
-    this.authService.login(data)
-    .pipe(first())
-    .subscribe({
-      next: () => {
-        console.log("In the next box")
-      },
-      error: error => console.log(error)
-    })
+    this.authService.login(data).subscribe(
+      (data) => console.log("Submit Data",data)
+    )
+ 
   }
 
   checkList() {
-    console.log("Looking at User",this.authService.userValue.refresh)
+    console.log("Looking at User",this.authService.tokenValue)
 
     this.userService.getList().subscribe(
-      (data) => console.log(data.refresh) 
+      (data) => console.log("Check List",data.refresh) 
     )
   }
 
 
 refreshToken() {
-  console.log(this.authService.userValue.refresh)
-  this.authService.refreshToken(this.authService.userValue)
+  this.authService.refreshToken()
   .subscribe(
     (data) => { console.log(data)
-    console.log(this.authService.userValue)
     }
   )
 }
