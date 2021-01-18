@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets,permissions
 from rest_framework_simplejwt import views as jwt_views
 
-from alpha.views import UserViewSet,GroupViewSet,UserCreateView
+from alpha.views import UserViewSet,GroupViewSet,UserCreateView,CalcDays
 
 
 
@@ -34,8 +34,8 @@ urlpatterns = [
     path('register/',UserCreateView.as_view(), name="register"),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh')
-
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('app/calc/<int:numb>/',CalcDays.as_view(),name="calcdays")
 #    path('users/auth/', UserDBAuth.as_view()),
 #    path('user/<pk>/',UserDBView.as_view())
 ]

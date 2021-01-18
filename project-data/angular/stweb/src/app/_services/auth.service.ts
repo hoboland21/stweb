@@ -39,7 +39,7 @@ export class AuthService {
     public get tokenValue(): IToken {
         return this.tokenSubject.value;
     }
-
+ 
     public tokenConvert(token) {
         let result = {}
         // decode the token to read the username and expiration timestamp
@@ -47,13 +47,14 @@ export class AuthService {
         let token_decoded = JSON.parse(window.atob(token_parts[1]));
         token_decoded.exp = token_decoded.exp * 1000
         token_decoded.ttl = token_decoded.exp - Date.now()
-        
+
         return token_decoded
     }
     
     public tokenInfo() {
         return this.tokenConvert(this.tokenValue.access)
     }
+    
     login(usr:any) {
         return this.http.post<any>(`${AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {

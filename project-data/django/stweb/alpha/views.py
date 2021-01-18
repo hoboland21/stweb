@@ -15,6 +15,14 @@ from .serializer import UserSerializer,GroupSerializer, UserAuthSerializer
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
+from alpha.misc import TDelta
+import json 
+
+class CalcDays(APIView) :
+   def get(self, request, numb, format=None):
+      t = TDelta(numb)
+      return Response(t.res)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -45,12 +53,3 @@ class UserCreateView(APIView)   :
          return Response(serializer.data, status=status.HTTP_201_CREATED)
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-class UserView(APIView)   :
-   def get(self, request, pk, format=None):
-      serializer = UserSerializer(data=request.data)
-      if serializer.is_valid():
-         serializer.save()
-         return Response(serializer.data, status=status.HTTP_201_CREATED)
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
