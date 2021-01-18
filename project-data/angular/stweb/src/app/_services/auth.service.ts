@@ -32,7 +32,6 @@ export class AuthService {
     constructor(   private router: Router, 
         private http: HttpClient  ) 
         {
-    
             this.tokenSubject = new BehaviorSubject<IToken>(null);
             this.token = this.tokenSubject.asObservable();
         }
@@ -41,19 +40,20 @@ export class AuthService {
         return this.tokenSubject.value;
     }
 
-
-
-
     public tokenConvert(token) {
         let result = {}
         // decode the token to read the username and expiration timestamp
         let token_parts = token.split(/\./);
         let token_decoded = JSON.parse(window.atob(token_parts[1]));
         token_decoded.exp = token_decoded.exp * 1000
+        token_decoded.ttl = token_decoded.exp - Date.now()
+        
         return token_decoded
     }
     
-    
+    public tokenInfo() {
+        return this.tokenConvert(this.tokenValue.access)
+    }
     login(usr:any) {
         return this.http.post<any>(`${AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {
@@ -65,10 +65,9 @@ export class AuthService {
     }
 
     logout() {
-    //    this.http.post<any>(`${environment.apiUrl}/users/revoke-token`, {}, { withCredentials: true }).subscribe();
         this.stopRefreshTokenTimer();
         this.tokenSubject.next(null);
-        this.router.navigate(['/login']);
+        this.router.navigate(['login']);
     }
 
     refreshToken() {
@@ -87,17 +86,16 @@ export class AuthService {
     private startRefreshTokenTimer() {
         // parse json object from base64 encoded jwt token
         const jwtToken = JSON.parse(atob(this.tokenValue.access.split('.')[1]));
-
         // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
-        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+        this.refreshTokenTimeout = setTimeout(() => { 
+            this.refreshToken().subscribe()
+        }, timeout);
     }
-
     private stopRefreshTokenTimer() {
         clearTimeout(this.refreshTokenTimeout);
     }
-
     public register(user: IUser ): Observable<any> {
         return this.http.post<any>(`${AUTH_API}/register/` , user,httpOptions);
       }

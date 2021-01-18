@@ -2,7 +2,7 @@
 <div class="col-md-4">
     <div *ngIf="!isLoggedIn">
 
-      <form [formGroup] = "formdata" (ngSubmit) = "onClickSubmit(formdata.value)" >
+      <form [formGroup] = "formdata" (ngSubmit) = "onSubmit(formdata.value)" >
         <input type = "text" class = "fortextbox" name = "username" placeholder = "username" 
           formControlName="username">
         <br/>

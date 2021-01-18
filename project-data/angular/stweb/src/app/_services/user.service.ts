@@ -13,8 +13,5 @@ export class UserService {
   constructor( private http: HttpClient) { }
   
   
-  getList(){
-    return this.http.get<any>(API_URL)
-  }
 
 }

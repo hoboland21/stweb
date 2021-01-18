@@ -12,7 +12,7 @@ import { RegisterComponent } from './register/register.component';
 import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 
-import { authInterceptorService } from './_helpers/auth.interceptor';
+import { authInterceptorProviders } from './_helpers/auth.interceptor';
 
 
 @NgModule({
@@ -30,7 +30,7 @@ import { authInterceptorService } from './_helpers/auth.interceptor';
     FormsModule,
     HttpClientModule
   ],
-  providers: [authInterceptorService],
+  providers: [authInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

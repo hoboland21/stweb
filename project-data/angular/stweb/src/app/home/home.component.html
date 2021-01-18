@@ -2,6 +2,8 @@
 <div class="container">
     <header class="jumbotron">
 
-  
+  User Info: {{ tokenInfo| json }}
+
+  <button (click)="rescan()">Rescan info</button>
     </header>
   </div>
