@@ -19,9 +19,10 @@ export class HomeComponent implements OnInit {
   user;
 
  ngOnInit(): void {
-    
+  this.authService.clockOvertime();     
   this.tokenInfo = this.authService.tokenInfo()
   this.userGet()
+  this.calcDelta()
     
   }
 
@@ -35,7 +36,8 @@ export class HomeComponent implements OnInit {
 
 
   rescan() : void {
-        this.authService.refreshToken().subscribe()
+//        this.authService.refreshToken().subscribe()
+        this.authService.clockOvertime(); 
         this.tokenInfo = this.authService.tokenInfo();
         this.calcDelta();
    

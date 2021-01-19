@@ -6,7 +6,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IUser } from '@app/_interfaces/IUser';
-import { IToken } from '@app/_interfaces/IToken';
 import { AppEnv } from '@app/_helpers/appenv'
 
 
@@ -26,22 +25,18 @@ const httpOptions = {
   }; 
  */ 
 export class AuthService {
-    private tokenSubject: BehaviorSubject<IToken>;
-    public token: Observable<IToken>;
     
     constructor(   private router: Router, 
         private http: HttpClient ,
         private env: AppEnv ) 
-        {
-            this.tokenSubject = new BehaviorSubject<IToken>(null);
-            this.token = this.tokenSubject.asObservable();
-        }
+        {  }
 
 
         private AUTH_API = this.env.API_URL
-        public get tokenValue(): IToken {
-            return this.tokenSubject.value;
-        }
+        
+        public get isLoggedIn() {
+            return (localStorage.getItem("access") != null);
+       }
  
     public tokenConvert(token) {
         let result = {}
@@ -54,33 +49,45 @@ export class AuthService {
         return token_decoded
     }
     
+
+    public clockOvertime() {
+        if (this.tokenConvert(localStorage.getItem("refresh")).ttl > 60000) 
+            if ( this.tokenConvert(localStorage.getItem("access")).ttl < 60000)  {
+                this.refreshToken().subscribe()
+        }
+
+    }
+
+
+
     public tokenInfo() {
-        return this.tokenConvert(this.tokenValue.access)
+        return this.tokenConvert(localStorage.access)
     }
 
     login(usr:any): Observable<any> {
         return this.http.post<any>(`${this.AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {
                 localStorage.setItem('refresh',token.refresh)
-                this.tokenSubject.next(token);              
+                localStorage.setItem('access',token.access)
+                console.log(localStorage)
                 this.startRefreshTokenTimer();
- //               return token;
-            }));
+           }));
     }
 
     logout() {
         this.stopRefreshTokenTimer();
-        this.tokenSubject.next(null);
         localStorage.removeItem("refresh")
+        localStorage.removeItem("access")
         this.router.navigate(['login']);
     }
 
+
+
     refreshToken() : Observable<any> {
-        return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.refresh },httpOptions)
+        return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.getItem("refresh") },httpOptions)
             .pipe(map((token) => {
-                this.tokenSubject.next(token);
+                localStorage.setItem('access',token.access);
                 this.startRefreshTokenTimer();
-//               return token;
             }));
     }
 
@@ -92,7 +99,7 @@ export class AuthService {
 
     private startRefreshTokenTimer() {
         // parse json object from base64 encoded jwt token
-        const jwtToken = JSON.parse(atob(this.tokenValue.access.split('.')[1]));
+        const jwtToken = JSON.parse(atob(localStorage.getItem("access").split('.')[1]));
         // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtToken.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
