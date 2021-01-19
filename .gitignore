@@ -2,3 +2,4 @@
 node_modules
 .bak
 .pid
+project_data/angular/stweb/src/app/_helpers/appenv.ts
