@@ -35,6 +35,7 @@ export class HomeComponent implements OnInit {
 
 
   rescan() : void {
+        this.authService.refreshToken().subscribe()
         this.tokenInfo = this.authService.tokenInfo();
         this.calcDelta();
    

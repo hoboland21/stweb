@@ -58,30 +58,33 @@ export class AuthService {
         return this.tokenConvert(this.tokenValue.access)
     }
 
-    login(usr:any) {
+    login(usr:any): Observable<any> {
         return this.http.post<any>(`${this.AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {
                 localStorage.setItem('refresh',token.refresh)
                 this.tokenSubject.next(token);              
                 this.startRefreshTokenTimer();
-                return token;
+ //               return token;
             }));
     }
 
     logout() {
         this.stopRefreshTokenTimer();
         this.tokenSubject.next(null);
+        localStorage.removeItem("refresh")
         this.router.navigate(['login']);
     }
 
-    refreshToken() {
+    refreshToken() : Observable<any> {
         return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.refresh },httpOptions)
             .pipe(map((token) => {
                 this.tokenSubject.next(token);
                 this.startRefreshTokenTimer();
-                return token;
+//               return token;
             }));
     }
+
+
 
     // helper methods
 
