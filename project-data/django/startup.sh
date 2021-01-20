@@ -7,3 +7,8 @@ cd stweb
 ./manage.py  migrate
 
 ./manage.py runserver 0.0.0.0:8000
+
+
+
+#cd /usr/src/app/stweb
+#uwsgi --ini   uwsgi.ini 

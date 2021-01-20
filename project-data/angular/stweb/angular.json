@@ -61,8 +61,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "stweb:build",
-	    "proxyConfig": "src/proxy.conf.json"
+            "browserTarget": "stweb:build"
 
           },
           "configurations": {
