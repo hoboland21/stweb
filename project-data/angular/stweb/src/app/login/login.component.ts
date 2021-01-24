@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
     localStorage.clear()
     this.authService.login(data).subscribe(
       (data) => {
-        this.router.navigate(['desktop']);
+        this.router.navigate(['home']);
       
       }
     )

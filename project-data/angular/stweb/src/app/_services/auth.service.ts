@@ -98,6 +98,7 @@ export class AuthService {
 
 
     public refreshToken() : Observable<any> {
+        localStorage.removeItem('access');
         return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.getItem("refresh") },httpOptions)
             .pipe(map((token) => {
                 localStorage.setItem('access',token.access);
