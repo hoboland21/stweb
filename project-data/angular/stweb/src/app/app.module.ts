@@ -13,7 +13,8 @@ import { HomeComponent } from './home/home.component';
 import { ProfileComponent } from './profile/profile.component';
 
 import { authInterceptorProviders } from './_helpers/auth.interceptor';
-import { AppEnv } from './_helpers/appenv'
+import { AppEnv } from './_helpers/appenv';
+import { DesktopComponent } from './desktop/desktop.component'
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { AppEnv } from './_helpers/appenv'
     RegisterComponent,
     HomeComponent,
     ProfileComponent,
+    DesktopComponent,
   ],
   imports: [
     BrowserModule,

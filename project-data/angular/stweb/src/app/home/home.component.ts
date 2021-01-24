@@ -10,43 +10,12 @@ import { UserService } from '@app/_services/user.service';
 })
 export class HomeComponent implements OnInit {
  
-  constructor(private authService: AuthService,
-    private miscService: MiscService,
-    private userService: UserService) { }
-
-  tokenInfo;
-  deltaT : {};
-  user;
-
- ngOnInit(): void {
-  this.authService.clockOvertime();     
-  this.tokenInfo = this.authService.tokenInfo()
-  this.userGet()
-  this.calcDelta()
+  constructor() {}
+  
+  
+  ngOnInit(): void {
     
   }
 
-  
-  userGet() {
-    let u = this.tokenInfo.user_id
-    this.userService.getUserRec(u).subscribe(
-      (data) => this.user=data
-    )
-  }
-
-
-  rescan() : void {
-//        this.authService.refreshToken().subscribe()
-        this.authService.clockOvertime(); 
-        this.tokenInfo = this.authService.tokenInfo();
-        this.calcDelta();
-   
-  }
-
-  calcDelta() {
-    let t = this.tokenInfo.ttl
-    this.miscService.deltaCalc(t).subscribe(
-      (data) => this.deltaT=data
-    )
-  }
 }
+

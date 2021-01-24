@@ -26,18 +26,25 @@ const httpOptions = {
  */ 
 export class AuthService {
     
+    private _isLoggedIn = new BehaviorSubject(this.tokenExist());
+    isLoggedIn = this._isLoggedIn.asObservable();
+
     constructor(   private router: Router, 
         private http: HttpClient ,
         private env: AppEnv ) 
         {  }
 
 
-        private AUTH_API = this.env.API_URL
-        
-        public get isLoggedIn() {
-            return (localStorage.getItem("access") != null);
-       }
- 
+    private AUTH_API = this.env.API_URL
+    
+
+
+
+    changeLoggedIn(token:boolean) {
+        this._isLoggedIn.next(token);
+    }
+
+    
     public tokenConvert(token) {
         let result = {}
         // decode the token to read the username and expiration timestamp
@@ -58,32 +65,39 @@ export class AuthService {
 
     }
 
-
+    
 
     public tokenInfo() {
         return this.tokenConvert(localStorage.access)
     }
 
-    login(usr:any): Observable<any> {
+    private tokenExist() {
+        return localStorage.access != null
+    }
+
+    
+ 
+    public login(usr:any): Observable<any> {
         return this.http.post<any>(`${this.AUTH_API}/api/token/`, usr,httpOptions)
         .pipe(map(token => {
                 localStorage.setItem('refresh',token.refresh)
                 localStorage.setItem('access',token.access)
-                console.log(localStorage)
                 this.startRefreshTokenTimer();
+                this.changeLoggedIn(this.tokenExist())
            }));
     }
 
-    logout() {
+    public logout() {
         this.stopRefreshTokenTimer();
         localStorage.removeItem("refresh")
         localStorage.removeItem("access")
-        this.router.navigate(['login']);
+        this.changeLoggedIn(this.tokenExist())
+        this.router.navigate(['home']);
     }
 
 
 
-    refreshToken() : Observable<any> {
+    public refreshToken() : Observable<any> {
         return this.http.post<any>(`${this.AUTH_API}/api/token/refresh/`, { refresh: localStorage.getItem("refresh") },httpOptions)
             .pipe(map((token) => {
                 localStorage.setItem('access',token.access);

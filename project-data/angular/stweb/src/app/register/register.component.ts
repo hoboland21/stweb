@@ -35,7 +35,6 @@ export class RegisterComponent implements OnInit {
   }
 
   onClickSubmit(data) {
-
     this.authService.register(data).subscribe(
       data => {
         console.log(data);

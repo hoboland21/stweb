@@ -1,6 +1,6 @@
 
 <div class="col-md-4">
-    <div *ngIf="!isLoggedIn">
+    <div>
 
       <form [formGroup] = "formdata" (ngSubmit) = "onSubmit(formdata.value)" >
         <input type = "text" class = "fortextbox" name = "username" placeholder = "username" 
@@ -15,15 +15,11 @@
   
       </form>
     </div>
-    <div>
-      Logged in as {{ group }}
+    
 
-
-    </div>
-
-    <button (click)="checkList()">Check List</button>
-    <button (click)="refreshToken()">Refresh</button>
-
+     
+ 
+ 
 
   </div>
   
