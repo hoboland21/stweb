@@ -1,19 +1,38 @@
 
-<div class="col-md-4">
-    <div>
+<div>
+    <div class="card" style="margin:200px auto;width:20%; width:400px; border:1px solid green" >
+      <div class="card-header" style="text-align:center" >
+        <img routerLink="home" src="assets/Working Logo Icon.png" alt="ST Logo" style="width: 250px">
+        <br>
+        <h5>Members Area</h5>
 
-      <form [formGroup] = "formdata" (ngSubmit) = "onSubmit(formdata.value)" >
-        <input type = "text" class = "fortextbox" name = "username" placeholder = "username" 
-          formControlName="username">
-        <br/>
-        
-        <input type = "password" class = "fortextbox" name="password" 
-          placeholder = "password" formControlName = "password">
-        <br/>
-        
-        <input type = "submit" class = "forsubmit" value = "Log In">
+      </div>
+      <div class="card-body">
+
+        <form [formGroup] = "formdata" (ngSubmit) = "onSubmit(formdata.value)" >
+          <input type = "text" class = "form-control" name = "username" placeholder = "username" 
+            formControlName="username">
+          <br/>
+          
+          <input type = "password" class = "form-control" name="password" 
+            placeholder = "password" formControlName = "password">
+          <br/>
+          
+          <input type = "submit" class = "form-control" value = "Log In">
+    
+        </form>
+      
   
-      </form>
+
+      </div>
+    
+    <div class="card-footer" style="text-align:center"> 
+      <button class="quiet_button">Forget Password</button> <button  class="ml-4 quiet_button">Register</button>
+
+    </div>
+
+
+    
     </div>
     
 
